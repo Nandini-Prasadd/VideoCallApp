@@ -1,5 +1,5 @@
-// import dotenv from "dotenv";
-// dotenv.config();
+import dotenv from "dotenv";
+dotenv.config();
 
 import express from "express";
 import { createServer } from "node:http";
@@ -25,12 +25,13 @@ app.use("/api/v1/users", userRoutes);
 
 // const dbUrl = process.env.ATLASDB_URL;
 const start = async () => {
-  const connectiondB = await mongoose.connect(
-    "mongodb+srv://nandini070418:q8wlFoTikyJZJC4W@cluster0.kgwgjxe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  );
+  const connectiondB = await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   console.log(`Connected to MongoDB : ${connectiondB.connection.host}`);
   server.listen(app.get("port"), () => {
-    console.log("Server is running on port 8000");
+    console.log("Server is running on port");
   });
 };
 

@@ -14,7 +14,6 @@ import ChatIcon from "@mui/icons-material/Chat";
 import server from "../environment";
 
 const server_url = server;
-// const server_url =
 
 var connections = {};
 
