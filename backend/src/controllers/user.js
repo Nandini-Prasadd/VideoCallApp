@@ -1,40 +1,50 @@
-import { User } from "../models/user.js";
 import httpStatus from "http-status";
 import bcrypt, { hash } from "bcrypt";
 import crypto from "crypto";
+import Meeting from "../models/meeting.js";
+import User from "../models/user.js";
 
 const login = async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !provide) {
-    return res.status(400).json({ message: "Please provide" });
+  console.log("Login request body:", req.body);
+
+  if (!username || !password) {
+    console.log("Missing fields");
+    return res.status(400).json({ message: "Username and password required" });
   }
+
   try {
     const user = await User.findOne({ username });
     if (!user) {
-      return res
-        .status(httpStatus.NOT_FOUND)
-        .json({ message: "User not found" });
+      console.log("User not found:", username);
+      return res.status(404).json({ message: "User not found" });
     }
-    let isPassCorrect = await bcrypt.compare(password, user.password);
-    if (isPassCorrect) {
-      let token = crypto.randomBytes(20).toString("hex");
-      user.token = token;
-      await user.save();
-      return res.status(httpStatus.OK).json({ token: token });
-    } else {
-      return res
-        .status(httpStatus.UNAUTHORIZED)
-        .json({ message: "Invalid Username or Password" });
+
+    const isPassCorrect = await bcrypt.compare(password, user.password);
+    if (!isPassCorrect) {
+      console.log("Password mismatch");
+      return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    const token = crypto.randomBytes(20).toString("hex");
+    user.token = token;
+    await user.save();
+
+    console.log("Login successful, token:", token);
+
+    return res.status(200).json({ token });
   } catch (e) {
-    return res.status(500).json({ message: `Something went wrong ${e}` });
+    console.error("Login error:", e);
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error: ${e.message}` });
   }
 };
 
 const register = async (req, res) => {
-  const { name, username, password } = req.body;
   try {
-    const existingUser = await User.findOne({ usernamw });
+    const { name, username, password } = req.body;
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res
         .status(httpStatus.FOUND)
@@ -48,6 +58,7 @@ const register = async (req, res) => {
     });
 
     await newUser.save();
+    console.log(newUser);
 
     res.status(httpStatus.CREATED).json({ message: "New acccount created" });
   } catch (e) {
@@ -59,11 +70,18 @@ const getUserHistory = async (req, res) => {
   const { token } = req.query;
 
   try {
-    const user = await User.findOne({ token: token });
-    const meetings = await Meeting.find({ user_id: user.username });
-    res.json(meetings);
+    const user = await User.findOne({ token });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const meetings = await Meeting.find({ user_id: user.username }).sort({
+      date: -1,
+    });
+
+    res.status(200).json(meetings);
   } catch (e) {
-    res.json({ message: `Something went wrong ${e}` });
+    res.status(500).json({ message: `Something went wrong ${e}` });
   }
 };
 
@@ -71,16 +89,14 @@ const addToHistory = async (req, res) => {
   const { token, meeting_code } = req.body;
 
   try {
-    const user = await User.findOne({ token: token });
-
+    const user = await User.findOne({ token });
     const newMeeting = new Meeting({
       user_id: user.username,
       meetingCode: meeting_code,
+      date: new Date(),
     });
-
     await newMeeting.save();
-
-    res.status(httpStatus.CREATED).json({ message: "Added code to history" });
+    res.status(201).json({ message: "Added code to history" });
   } catch (e) {
     res.json({ message: `Something went wrong ${e}` });
   }

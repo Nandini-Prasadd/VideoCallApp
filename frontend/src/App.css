@@ -61,30 +61,70 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-inline: 20px;
-  text-align: center;
+  padding: 20px 40px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.meetContainer {
+
+.homeMain {
   display: flex;
-  padding-inline: 20px;
-  height: 80vh;
-  gap: 10vw;
   justify-content: center;
+  align-items: center;
+  height: 85vh;
+  gap: 5vw;
+  padding: 0 5vw;
 }
 
 .leftPanel {
-  height: 100%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 16px;
+  background-color: #ffffff;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.meetingInputGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .rightPanel {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.rightPanel > img {
-  width: 30vw;
-  height: auto;
-  border-radius: 20px;
+.rightPanel img {
+  width: 350px;
+  max-width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.auth-image {
+  flex: 1;
+  background-image: url("../public/pic.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-form {
+  flex: 1;
+  height: 100vh; /* full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box; /* ensures padding included in width */
+  padding: 0 40px; /* add some horizontal padding */
 }

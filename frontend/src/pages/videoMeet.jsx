@@ -54,10 +54,50 @@ export default function VideoMeetComponent() {
   const videoRef = useRef([]);
 
   let [videos, setVideos] = useState([]);
+ const [stream, setStream] = useState(null);
 
   useEffect(() => {
     getPermissions();
-  });
+  }, []);
+
+    const getPermissions = async () => {
+    try {
+      const userMediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      window.localStream = userMediaStream;
+      localVideoref.current.srcObject = userMediaStream;
+      setStream(userMediaStream);
+
+      if (navigator.mediaDevices.getDisplayMedia) {
+        setScreenAvailable(true);
+      } else {
+        setScreenAvailable(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleVideo = async () => {
+    if (!stream) return;
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setVideo(videoTrack.enabled);
+    }
+  };
+
+
+  const handleAudio = () => {
+    const audioTrack = window.localStream?.getAudioTracks()[0];
+    if (audioTrack) {
+      const enabled = !audioTrack.enabled;
+      audioTrack.enabled = enabled;
+      setAudio(enabled);
+    }
+  };
 
   let getDislayMedia = () => {
     if (screen) {
@@ -68,53 +108,6 @@ export default function VideoMeetComponent() {
           .then((stream) => {})
           .catch((e) => console.log(e));
       }
-    }
-  };
-
-  const getPermissions = async () => {
-    try {
-      const videoPermission = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      if (videoPermission) {
-        setVideoAvailable(true);
-        console.log("Video permission granted");
-      } else {
-        setVideoAvailable(false);
-        console.log("Video permission denied");
-      }
-
-      const audioPermission = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
-      if (audioPermission) {
-        setAudioAvailable(true);
-        console.log("Audio permission granted");
-      } else {
-        setAudioAvailable(false);
-        console.log("Audio permission denied");
-      }
-
-      if (navigator.mediaDevices.getDisplayMedia) {
-        setScreenAvailable(true);
-      } else {
-        setScreenAvailable(false);
-      }
-
-      if (videoAvailable || audioAvailable) {
-        const userMediaStream = await navigator.mediaDevices.getUserMedia({
-          video: videoAvailable,
-          audio: audioAvailable,
-        });
-        if (userMediaStream) {
-          window.localStream = userMediaStream;
-          if (localVideoref.current) {
-            localVideoref.current.srcObject = userMediaStream;
-          }
-        }
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -430,14 +423,14 @@ export default function VideoMeetComponent() {
     return Object.assign(stream.getVideoTracks()[0], { enabled: false });
   };
 
-  let handleVideo = () => {
-    setVideo(!video);
-    // getUserMedia();
-  };
-  let handleAudio = () => {
-    setAudio(!audio);
-    // getUserMedia();
-  };
+  // let handleVideo = () => {
+  //   setVideo(!video);
+  //   // getUserMedia();
+  // };
+  // let handleAudio = () => {
+  //   setAudio(!audio);
+  //   // getUserMedia();
+  // };
 
   useEffect(() => {
     if (screen !== undefined) {
@@ -491,55 +484,82 @@ export default function VideoMeetComponent() {
   };
 
   return (
-    <div>
-      {askForUsername === true ? (
-        <div>
-          <h2>Enter into Lobby </h2>
+    <div className="meet-wrapper">
+      {askForUsername ? (
+        <div className="lobby-container">
+          <h2>Enter the Lobby</h2>
+          <br></br>
           <TextField
             id="outlined-basic"
             label="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             variant="outlined"
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "white",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#00bcd4", // optional hover color
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#00bcd4", // optional focus color
+                },
+              },
+            }}
           />
+          <br></br>
           <Button variant="contained" onClick={connect}>
             Connect
           </Button>
-
-          <div>
+          <div className="preview-video">
             <video ref={localVideoref} autoPlay muted></video>
           </div>
         </div>
       ) : (
-        <div className={styles.meetVideoContainer}>
-          {showModal ? (
-            <div className={styles.chatRoom}>
-              <div className={styles.chatContainer}>
+        <div className="meet-video-container">
+          {showModal && (
+            <div className="chat-room">
+              <div className="chat-container">
                 <h1>Chat</h1>
-
-                <div className={styles.chattingDisplay}>
+                <div className="chatting-display">
                   {messages.length !== 0 ? (
-                    messages.map((item, index) => {
-                      console.log(messages);
-                      return (
-                        <div style={{ marginBottom: "20px" }} key={index}>
-                          <p style={{ fontWeight: "bold" }}>{item.sender}</p>
-                          <p>{item.data}</p>
-                        </div>
-                      );
-                    })
+                    messages.map((item, index) => (
+                      <div className="chat-message" key={index}>
+                        <p className="chat-sender">{item.sender}</p>
+                        <p>{item.data}</p>
+                      </div>
+                    ))
                   ) : (
-                    <p>No Messages Yet</p>
+                    <p className="no-messages">No Messages Yet</p>
                   )}
                 </div>
-
-                <div className={styles.chattingArea}>
+                <div className="chatting-area">
                   <TextField
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     id="outlined-basic"
                     label="Enter Your chat"
                     variant="outlined"
+                    fullWidth
+                    sx={{
+                      input: { color: "white" },
+                      label: { color: "white" },
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "white",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#00bcd4", // optional hover color
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#00bcd4", // optional focus color
+                        },
+                      },
+                    }}
                   />
                   <Button variant="contained" onClick={sendMessage}>
                     Send
@@ -547,53 +567,49 @@ export default function VideoMeetComponent() {
                 </div>
               </div>
             </div>
-          ) : (
-            <></>
           )}
 
-          <div className={styles.buttonContainers}>
-            <IconButton onClick={handleVideo} style={{ color: "white" }}>
-              {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
+          <div className="button-containers">
+            <IconButton onClick={handleVideo}>
+              {video ? <VideocamIcon /> : <VideocamOffIcon />}
             </IconButton>
-            <IconButton onClick={handleEndCall} style={{ color: "red" }}>
+            <IconButton
+              onClick={handleEndCall}
+              style={{
+                backgroundColor: "red",
+                color: "white",
+                borderRadius: "50%",
+                padding: "12px",
+              }}
+            >
               <CallEndIcon />
             </IconButton>
-            <IconButton onClick={handleAudio} style={{ color: "white" }}>
-              {audio === true ? <MicIcon /> : <MicOffIcon />}
+
+            <IconButton onClick={handleAudio}>
+              {audio ? <MicIcon /> : <MicOffIcon />}
             </IconButton>
-
-            {screenAvailable === true ? (
-              <IconButton onClick={handleScreen} style={{ color: "white" }}>
-                {screen === true ? (
-                  <ScreenShareIcon />
-                ) : (
-                  <StopScreenShareIcon />
-                )}
+            {screenAvailable && (
+              <IconButton onClick={handleScreen}>
+                {screen ? <ScreenShareIcon /> : <StopScreenShareIcon />}
               </IconButton>
-            ) : (
-              <></>
             )}
-
-            <Badge badgeContent={newMessages} max={999} color="orange">
-              <IconButton
-                onClick={() => setModal(!showModal)}
-                style={{ color: "white" }}
-              >
-                <ChatIcon />{" "}
+            <Badge badgeContent={newMessages} max={999} color="error">
+              <IconButton onClick={() => setModal(!showModal)}>
+                <ChatIcon />
               </IconButton>
             </Badge>
           </div>
 
           <video
-            className={styles.meetUserVideo}
+            className="meet-user-video"
             ref={localVideoref}
             autoPlay
             muted
           ></video>
 
-          <div className={styles.conferenceView}>
+          <div className="conference-view">
             {videos.map((video) => (
-              <div key={video.socketId}>
+              <div key={video.socketId} className="remote-video-wrapper">
                 <video
                   data-socket={video.socketId}
                   ref={(ref) => {
@@ -602,6 +618,8 @@ export default function VideoMeetComponent() {
                     }
                   }}
                   autoPlay
+                  playsInline
+                  className="remote-video"
                 ></video>
               </div>
             ))}

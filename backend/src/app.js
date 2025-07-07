@@ -31,7 +31,7 @@ const start = async () => {
   });
   console.log(`Connected to MongoDB : ${connectiondB.connection.host}`);
   server.listen(app.get("port"), () => {
-    console.log("Server is running on port");
+    console.log(`Server is running on port ${app.get("port")}`);
   });
 };
 

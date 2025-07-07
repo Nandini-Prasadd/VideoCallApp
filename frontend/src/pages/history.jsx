@@ -9,21 +9,27 @@ import HomeIcon from "@mui/icons-material/Home";
 import { IconButton } from "@mui/material";
 export default function History() {
   const { getHistoryOfUser } = useContext(AuthContext);
+  console.log("Function from context:", getHistoryOfUser);
 
   const [meetings, setMeetings] = useState([]);
 
   const routeTo = useNavigate();
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const history = await getHistoryOfUser();
-        setMeetings(history);
-      } catch {}
-    };
+ useEffect(() => {
+  const fetchHistory = async () => {
+    console.log("Calling getHistoryOfUser...");
+    try {
+      const history = await getHistoryOfUser();
+      console.log("Fetched history:", history); // ADD THIS
+      setMeetings(history);
+    } catch (err) {
+      console.error("Error fetching history:", err);
+    }
+  };
 
-    fetchHistory();
-  }, []);
+  fetchHistory();
+}, []);
+
 
   let formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -43,7 +49,7 @@ export default function History() {
       >
         <HomeIcon />
       </IconButton>
-      {meetings.length !== 0 ? (
+      {Array.isArray(meetings) && meetings.length !== 0 ? (
         meetings.map((e, i) => {
           return (
             <>
@@ -66,7 +72,9 @@ export default function History() {
           );
         })
       ) : (
-        <></>
+        <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
+          No history available.
+        </Typography>
       )}
     </div>
   );

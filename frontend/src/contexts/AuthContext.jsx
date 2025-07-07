@@ -23,9 +23,10 @@ export const AuthProvider = ({ children }) => {
         password: password,
       });
       if (request.status === httpStatus.CREATED) {
-        return request.data.mesaage;
+        return request.data.message;
       }
     } catch (err) {
+      console.error("Register error:", err);
       throw err;
     }
   };
@@ -36,10 +37,16 @@ export const AuthProvider = ({ children }) => {
         username: username,
         password: password,
       });
+      console.log("Login response:", request);
       if (request.status === httpStatus.OK) {
+        console.log("Login successful, saving token");
         localStorage.setItem("token", request.data.token);
+        router("/home");
+      } else {
+        console.warn("Login failed, status:", request.status);
       }
     } catch (err) {
+      console.error("Login error:", err);
       throw err;
     }
   };
