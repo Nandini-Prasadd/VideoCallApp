@@ -54,13 +54,13 @@ export default function VideoMeetComponent() {
   const videoRef = useRef([]);
 
   let [videos, setVideos] = useState([]);
- const [stream, setStream] = useState(null);
+  const [stream, setStream] = useState(null);
 
   useEffect(() => {
     getPermissions();
   }, []);
 
-    const getPermissions = async () => {
+  const getPermissions = async () => {
     try {
       const userMediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -88,7 +88,6 @@ export default function VideoMeetComponent() {
       setVideo(videoTrack.enabled);
     }
   };
-
 
   const handleAudio = () => {
     const audioTrack = window.localStream?.getAudioTracks()[0];

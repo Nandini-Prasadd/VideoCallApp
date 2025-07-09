@@ -17,17 +17,16 @@ const io = connectToSocket(server);
 
 app.set("port", process.env.PORT || 8000);
 
-
 app.use(
   cors({
-    origin: "*",
+    origin: "https://zapchatfrontend-syf7.onrender.com",
     credentials: true,
   })
 );
 
 // app.options("*", cors());
 
-app.use(express.json({ limit: "40kb" }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "40kb" }));
 
 app.use("/api/v1/users", userRoutes);
